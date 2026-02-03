@@ -1,8 +1,10 @@
+/**
+ * Root Layout
+ * 应用根布局
+ */
+
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 // import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { AppSidebar } from "@/components/layout/sidebar";
-import { NetworkProvider } from "@/contexts/network-context";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -10,21 +12,9 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   return (
-    <NetworkProvider>
-      <SidebarProvider
-        className="h-svh"
-        style={
-          {
-            "--sidebar-width": "220px",
-          } as React.CSSProperties
-        }
-      >
-        <AppSidebar />
-        <SidebarInset className="overflow-hidden">
-          <Outlet />
-        </SidebarInset>
-      </SidebarProvider>
+    <>
+      <Outlet />
       {/* {import.meta.env.DEV && <TanStackRouterDevtools />} */}
-    </NetworkProvider>
+    </>
   );
 }

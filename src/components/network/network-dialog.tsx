@@ -73,7 +73,7 @@ export function NetworkDialog({ open, onOpenChange }: NetworkDialogProps) {
 
   const handleAction = async () => {
     if (isRunning) {
-      stopNode();
+      await stopNode();
     } else if (!isStarting) {
       await startNode();
     }

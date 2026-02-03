@@ -33,19 +33,20 @@ export type NodeEvent =
 
 /**
  * 启动 P2P 网络节点
+ * 注意：调用前必须确保 keypair 已通过 register_keypair 注册到后端
  *
- * @param keypair - 节点密钥对（序列化后的字节数组）
  * @param onEvent - 节点事件回调函数
  */
-export async function start(
-  keypair: number[],
-  onEvent: (event: NodeEvent) => void
-): Promise<void> {
+export async function start(onEvent: (event: NodeEvent) => void): Promise<void> {
   const channel = new Channel<NodeEvent>();
   channel.onmessage = onEvent;
 
-  await invoke("start", {
-    keypair,
-    channel,
-  });
+  await invoke("start", { channel });
+}
+
+/**
+ * 关闭 P2P 网络节点
+ */
+export async function shutdown(): Promise<void> {
+  await invoke("shutdown");
 }

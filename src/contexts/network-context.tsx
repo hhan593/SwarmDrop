@@ -12,11 +12,13 @@ import {
   type ReactNode,
 } from "react";
 import {
+  shutdown,
   start,
   type Multiaddr,
   type NodeEvent,
   type PeerId,
 } from "@/commands/network";
+import { useSecretStore } from "@/stores/secret-store";
 
 export type NodeStatus = "stopped" | "starting" | "running" | "error";
 
@@ -30,19 +32,20 @@ interface NetworkState {
 
 interface NetworkContextValue extends NetworkState {
   startNode: () => Promise<void>;
-  stopNode: () => void;
+  stopNode: () => Promise<void>;
 }
 
 const NetworkContext = createContext<NetworkContextValue | null>(null);
 
 export function NetworkProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<NetworkState>({
+  // 使用函数形式的懒初始化，避免每次渲染时重新创建 Set/Map 对象
+  const [state, setState] = useState<NetworkState>(() => ({
     status: "stopped",
     listeningAddrs: [],
     connectedPeers: new Set(),
     discoveredPeers: new Map(),
     error: null,
-  });
+  }));
 
   const handleNodeEvent = useCallback((event: NodeEvent) => {
     console.log("Network event:", event);
@@ -88,24 +91,31 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const startNode = useCallback(async () => {
-    if (state.status === "running" || state.status === "starting") {
-      return;
-    }
+    // Use functional setState to check status without depending on it
+    let shouldStart = false;
+    setState((prev) => {
+      if (prev.status === "running" || prev.status === "starting") {
+        return prev; // No state change
+      }
+      shouldStart = true;
+      return {
+        ...prev,
+        status: "starting",
+        error: null,
+        listeningAddrs: [],
+        connectedPeers: new Set(),
+        discoveredPeers: new Map(),
+      };
+    });
 
-    setState((prev) => ({
-      ...prev,
-      status: "starting",
-      error: null,
-      listeningAddrs: [],
-      connectedPeers: new Set(),
-      discoveredPeers: new Map(),
-    }));
+    if (!shouldStart) return;
 
     try {
-      // TODO: 从存储中获取或生成密钥对
-      // 目前使用空数组，后端应该会生成新的密钥对
-      const keypair: number[] = [];
-      await start(keypair, handleNodeEvent);
+      const { deviceId } = useSecretStore.getState();
+      if (!deviceId) {
+        throw new Error("Keypair not initialized");
+      }
+      await start(handleNodeEvent);
     } catch (err) {
       setState((prev) => ({
         ...prev,
@@ -113,26 +123,53 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
         error: err instanceof Error ? err.message : String(err),
       }));
     }
-  }, [state.status, handleNodeEvent]);
+  }, [handleNodeEvent]);
 
-  const stopNode = useCallback(() => {
-    // TODO: 实现停止节点的命令
-    setState({
-      status: "stopped",
-      listeningAddrs: [],
-      connectedPeers: new Set(),
-      discoveredPeers: new Map(),
-      error: null,
+  const stopNode = useCallback(async () => {
+    // Use functional setState to check status without depending on it
+    let shouldStop = false;
+    setState((prev) => {
+      if (prev.status !== "running") {
+        return prev; // No state change
+      }
+      shouldStop = true;
+      return {
+        status: "stopped",
+        listeningAddrs: [],
+        connectedPeers: new Set(),
+        discoveredPeers: new Map(),
+        error: null,
+      };
     });
+
+    if (!shouldStop) return;
+
+    try {
+      await shutdown();
+    } catch (err) {
+      console.error("Failed to shutdown node:", err);
+    }
   }, []);
 
   const value = useMemo<NetworkContextValue>(
     () => ({
-      ...state,
+      status: state.status,
+      listeningAddrs: state.listeningAddrs,
+      connectedPeers: state.connectedPeers,
+      discoveredPeers: state.discoveredPeers,
+      error: state.error,
       startNode,
       stopNode,
     }),
-    [state, startNode, stopNode],
+    [
+      state.status,
+      state.listeningAddrs,
+      state.connectedPeers,
+      state.discoveredPeers,
+      state.error,
+      startNode,
+      stopNode,
+    ]
   );
 
   return (

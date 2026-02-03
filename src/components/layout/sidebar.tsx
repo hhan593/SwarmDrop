@@ -9,11 +9,11 @@ import {
 import { Link, useRouterState } from "@tanstack/react-router";
 import { msg } from "@lingui/core/macro";
 import type { MessageDescriptor } from "@lingui/core";
-import { useLingui } from "@lingui/react";
+import { useLingui } from "@lingui/react/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "react";
 import { useNetwork, type NodeStatus } from "@/contexts/network-context";
-import { NetworkDialog } from "@/components/network";
+import { NetworkDialog } from "@/components/network/network-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Sidebar,
@@ -72,7 +72,7 @@ const statusConfig: Record<
 };
 
 export function AppSidebar() {
-  const { _ } = useLingui();
+  const { t } = useLingui();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
   const [networkDialogOpen, setNetworkDialogOpen] = useState(false);
@@ -113,14 +113,14 @@ export function AppSidebar() {
                       isActive={isActive}
                       className="h-9 px-2.5 text-[13px]"
                     >
-                      <Link to={item.href}>
+                      <Link to={item.href} preload="intent">
                         <Icon
                           className={cn(
                             "size-4.5",
                             isActive ? "text-blue-600" : "text-muted-foreground"
                           )}
                         />
-                        <span>{_(item.label)}</span>
+                        <span>{t(item.label)}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -154,7 +154,7 @@ export function AppSidebar() {
           >
             <span className={cn("size-1.5 rounded-full", config.dotColor)} />
             <span className={cn("text-[11px]", config.textColor)}>
-              {_(config.label)}
+              {t(config.label)}
             </span>
           </button>
         </div>

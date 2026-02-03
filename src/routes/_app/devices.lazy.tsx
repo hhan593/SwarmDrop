@@ -1,10 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+/**
+ * Devices Page (Lazy)
+ * 设备页面 - 懒加载组件
+ */
+
+import { createLazyFileRoute } from "@tanstack/react-router";
 import { Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeviceCard, type Device } from "@/components/devices/device-card";
 import { Trans } from "@lingui/react/macro";
 
-export const Route = createFileRoute("/devices")({
+export const Route = createLazyFileRoute("/_app/devices")({
   component: DevicesPage,
 });
 

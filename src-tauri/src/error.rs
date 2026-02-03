@@ -48,6 +48,14 @@ pub enum AppError {
     #[error("Peer error: {0}")]
     Peer(String),
 
+    /// 身份/密钥对错误
+    #[error("Identity error: {0}")]
+    Identity(String),
+
+    /// Keychain/Keyring 错误
+    #[error("Keychain error: {0}")]
+    Keychain(String),
+
     /// 未知错误
     #[error("{0}")]
     Unknown(String),
@@ -73,12 +81,22 @@ impl Serialize for AppError {
             AppError::Config(msg) => ("Config", msg.clone()),
             AppError::Transfer(msg) => ("Transfer", msg.clone()),
             AppError::Peer(msg) => ("Peer", msg.clone()),
+            AppError::Identity(msg) => ("Identity", msg.clone()),
+            AppError::Keychain(msg) => ("Keychain", msg.clone()),
             AppError::Unknown(msg) => ("Unknown", msg.clone()),
         };
 
         state.serialize_field("kind", kind)?;
         state.serialize_field("message", &message)?;
         state.end()
+    }
+}
+
+// ============ 错误转换 ============
+
+impl From<keyring_core::Error> for AppError {
+    fn from(e: keyring_core::Error) -> Self {
+        AppError::Keychain(e.to_string())
     }
 }
 

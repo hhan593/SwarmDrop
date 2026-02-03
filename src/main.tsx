@@ -5,6 +5,7 @@ import { I18nProvider } from "@lingui/react";
 import { i18n } from "@lingui/core";
 import { routeTree } from "./routeTree.gen";
 import { defaultLocale, dynamicActivate } from "@/lib/i18n";
+import { useAuthStore } from "@/stores/auth-store";
 import "./index.css";
 
 // Create a new router instance
@@ -21,7 +22,11 @@ function App() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    dynamicActivate(defaultLocale).then(() => setIsLoaded(true));
+    // 使用 getState() 避免不必要的订阅，因为这些只在初始化时调用一次
+    Promise.all([
+      dynamicActivate(defaultLocale),
+      useAuthStore.getState().checkBiometricAvailability(),
+    ]).then(() => setIsLoaded(true));
   }, []);
 
   if (!isLoaded) {
@@ -38,5 +43,5 @@ function App() {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
 );

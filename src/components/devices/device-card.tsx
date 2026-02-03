@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { msg } from "@lingui/core/macro";
 import type { MessageDescriptor } from "@lingui/core";
-import { useLingui } from "@lingui/react";
+import { useLingui } from "@lingui/react/macro";
 import { Trans } from "@lingui/react/macro";
 
 export type DeviceType = "smartphone" | "tablet" | "laptop" | "desktop";
@@ -41,7 +41,7 @@ const connectionConfig: Record<
   ConnectionType,
   {
     icon: React.ComponentType<{ className?: string }>;
-    label: MessageDescriptor;
+    label?: MessageDescriptor;
     bgColor: string;
     textColor: string;
   }
@@ -66,7 +66,6 @@ const connectionConfig: Record<
   },
   none: {
     icon: Wifi,
-    label: msg``,
     bgColor: "",
     textColor: "",
   },
@@ -79,7 +78,7 @@ interface DeviceCardProps {
 }
 
 export function DeviceCard({ device, onSend, onConnect }: DeviceCardProps) {
-  const { _ } = useLingui();
+  const { t } = useLingui();
   const DeviceIcon = deviceIcons[device.type];
   const isOnline = device.status === "online";
   const connection = device.connection ?? "none";
@@ -139,9 +138,11 @@ export function DeviceCard({ device, onSend, onConnect }: DeviceCardProps) {
             )}
           >
             <connConfig.icon className={cn("size-2.5", connConfig.textColor)} />
-            <span className={cn("text-[10px] font-medium", connConfig.textColor)}>
-              {_(connConfig.label)}
-            </span>
+            {connConfig.label && (
+              <span className={cn("text-[10px] font-medium", connConfig.textColor)}>
+                {t(connConfig.label)}
+              </span>
+            )}
             <span className={cn("text-[10px] font-medium", connConfig.textColor)}>
               {device.latency}ms
             </span>
