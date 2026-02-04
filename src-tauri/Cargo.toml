@@ -33,6 +33,7 @@ tauri-plugin-stronghold = "2"
 tauri-plugin-biometry = "0.2"
 keyring-core = "0.7"
 tauri-plugin-fs = "2"
+tauri-plugin-os = "2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 apple-native-keyring-store = { version = "0.2", features = ["keychain"] }
