@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "android:dev": "node scripts/android.mjs dev",
+    "android:build": "node scripts/android.mjs build",
     "i18n:extract": "lingui extract"
   },
   "dependencies": {

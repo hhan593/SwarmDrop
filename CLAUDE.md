@@ -3,6 +3,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Language
+
+Always respond in Chinese (简体中文). All output, including thinking, planning, commit messages, and comments, must be in Chinese.
+
 ## Project Overview
 
 SwarmDrop is a **decentralized, cross-network, end-to-end encrypted file transfer tool** built with Tauri v2. It aims to be a "cross-network version of LocalSend" - no accounts, no servers, supporting both LAN and cross-network peer-to-peer file transfers.

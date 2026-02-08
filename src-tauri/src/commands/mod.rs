@@ -7,8 +7,9 @@ use tauri::{ipc::Channel, AppHandle, Manager, State};
 use tokio::sync::Mutex;
 use tracing::error;
 
+// TODO: 定义实际的请求/响应类型后替换 ()
 /// NetClient 状态类型
-pub type NetClientState = Mutex<Option<NetClient>>;
+pub type NetClientState = Mutex<Option<NetClient<(), ()>>>;
 
 #[tauri::command]
 pub async fn start(
@@ -31,7 +32,7 @@ pub async fn start(
         .with_dcutr(true)
         .with_autonat(true);
 
-    let (client, mut receiver) = swarm_p2p_core::start((*keypair).clone(), config)?;
+    let (client, mut receiver) = swarm_p2p_core::start::<(), ()>((*keypair).clone(), config)?;
 
     tokio::spawn(async move {
         while let Some(event) = receiver.recv().await {
