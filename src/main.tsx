@@ -4,8 +4,11 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { I18nProvider } from "@lingui/react";
 import { i18n } from "@lingui/core";
 import { routeTree } from "./routeTree.gen";
-import { defaultLocale, dynamicActivate } from "@/lib/i18n";
 import { useAuthStore } from "@/stores/auth-store";
+import {
+  usePreferencesStore,
+  waitForPreferencesHydration,
+} from "@/stores/preferences-store";
 import "./index.css";
 
 // Create a new router instance
@@ -22,11 +25,21 @@ function App() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // 使用 getState() 避免不必要的订阅，因为这些只在初始化时调用一次
+    // 等待偏好设置 hydration 完成（主题和语言在 onRehydrateStorage 中自动应用）
     Promise.all([
-      dynamicActivate(defaultLocale),
+      waitForPreferencesHydration(),
       useAuthStore.getState().checkBiometricAvailability(),
     ]).then(() => setIsLoaded(true));
+
+    // 监听系统主题变化（仅 system 模式下生效）
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => {
+      if (usePreferencesStore.getState().theme === "system") {
+        usePreferencesStore.getState().applyTheme();
+      }
+    };
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
   if (!isLoaded) {
