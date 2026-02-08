@@ -34,6 +34,7 @@ tauri-plugin-stronghold = "2"
 tauri-plugin-biometry = "0.2"
 tauri-plugin-fs = "2"
 tauri-plugin-os = "2"
+tauri-plugin-store = "2"
 
 # 在 dev 模式下为依赖开启优化（加密运算必须）
 # 否则 Stronghold 等加密库会慢 10-100 倍
